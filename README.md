@@ -14,7 +14,8 @@
 - **Koin** 
 - **MVVM Pattern**
 - **Google Maps** 
-- **Room Database** 
+- **Room Database**
+- CI/CD
 
 --
 
