@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.navigation.compose)
+    implementation(libs.accompanist.permissions)
 
     implementation(libs.bundles.koin)
     implementation(libs.maps.compose)
