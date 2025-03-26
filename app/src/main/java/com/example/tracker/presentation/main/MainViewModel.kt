@@ -2,13 +2,18 @@ package com.example.tracker.presentation.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tracker.data.database.entity.VehicleEntity
+import com.example.tracker.domain.repository.VehicleRepository
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class MainViewModel : ViewModel() {
+class MainViewModel(
+    private val repository: VehicleRepository
+) : ViewModel() {
 
     private val _vehicleLocation = MutableStateFlow(LatLng(-6.200000, 106.816666))
     val vehicleLocation = _vehicleLocation.asStateFlow()
@@ -43,13 +48,21 @@ class MainViewModel : ViewModel() {
 
     private fun startSimulation() {
         _isSimulating.value = true
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             while (_isSimulating.value) {
-                _vehicleLocation.value = path[pathIndex % path.size]
+                val currentLocation = path[pathIndex % path.size]
+                _vehicleLocation.value = currentLocation
                 _vehicleSpeed.value = (40..120).random()
                 _engineStatus.value = (0..1).random() == 1
                 _doorStatus.value = (0..1).random() == 1
                 pathIndex++
+
+                saveVehicleHistory(
+                    currentLocation,
+                    _vehicleSpeed.value,
+                    _engineStatus.value,
+                    _doorStatus.value
+                )
                 delay(3000)
             }
         }
@@ -57,5 +70,22 @@ class MainViewModel : ViewModel() {
 
     private fun stopSimulation() {
         _isSimulating.value = false
+    }
+
+    private fun saveVehicleHistory(
+        location: LatLng,
+        speed: Int,
+        engineStatus: Boolean,
+        doorStatus: Boolean
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        val history = VehicleEntity(
+            lat = location.latitude,
+            lng = location.longitude,
+            speed = speed,
+            engineStatus = engineStatus,
+            doorStatus = doorStatus,
+            timestamp = System.currentTimeMillis()
+        )
+        repository.insertHistory(history)
     }
 }

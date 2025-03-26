@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -26,20 +28,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.example.tracker.presentation.navigation.Routes
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 
 @SuppressLint("ContextCastToActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(navController: NavHostController) {
 
-    val vehicleViewModel: MainViewModel = viewModel()
+    val vehicleViewModel: MainViewModel = koinViewModel()
 
     val vehicleLocation by vehicleViewModel.vehicleLocation.collectAsStateWithLifecycle()
     val vehicleSpeed by vehicleViewModel.vehicleSpeed.collectAsStateWithLifecycle()
@@ -66,10 +71,10 @@ fun MainScreen() {
             modifier = Modifier
                 .padding(16.dp)
                 .align(Alignment.BottomStart),
-            verticalArrangement =Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            Button (
+            Button(
                 onClick = {
                     cameraPositionState.move(CameraUpdateFactory.newLatLng(defaultLocation))
                 },
@@ -93,24 +98,38 @@ fun MainScreen() {
                 onDismissRequest = { scope.launch { bottomSheetState.hide() } },
                 sheetState = bottomSheetState
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Vehicle Status", style = MaterialTheme.typography.headlineSmall)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    if (isSimulating) {
-                        Text("Lokasi: ${vehicleLocation.latitude}, ${vehicleLocation.longitude}")
-                        Text("Kecepatan: $vehicleSpeed km/h")
-                        Text("Mesin: ${if (engineStatus) "On" else "Off"}")
-                        Text("Pintu: ${if (doorStatus) "Terbuka" else "Tertutup"}")
-                        Button(onClick = { vehicleViewModel.toggleSimulation() }) {
-                            Text("Stop Simulation")
-                        }
-                    } else {
-                        Text("Simulasi belum dimulai.")
-                        Button(onClick = { vehicleViewModel.toggleSimulation() }) {
-                            Text("Start Simulation")
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Vehicle Status", style = MaterialTheme.typography.headlineSmall)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        if (isSimulating) {
+                            Text("Lokasi: ${vehicleLocation.latitude}, ${vehicleLocation.longitude}")
+                            Text("Kecepatan: $vehicleSpeed km/h")
+                            Text("Mesin: ${if (engineStatus) "On" else "Off"}")
+                            Text("Pintu: ${if (doorStatus) "Terbuka" else "Tertutup"}")
+                            Button(onClick = { vehicleViewModel.toggleSimulation() }) {
+                                Text("Stop Simulation")
+                            }
+                        } else {
+                            Text("Simulasi belum dimulai.")
+                            Button(onClick = { vehicleViewModel.toggleSimulation() }) {
+                                Text("Start Simulation")
+                            }
                         }
                     }
+                    Button(onClick = {
+                        navController.navigate(Routes.History.route)
+                    }) {
+                        Text("Log History")
+                    }
                 }
+
             }
         }
 
