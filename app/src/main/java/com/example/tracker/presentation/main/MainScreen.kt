@@ -109,15 +109,15 @@ fun MainScreen(navController: NavHostController) {
                         Text("Vehicle Status", style = MaterialTheme.typography.headlineSmall)
                         Spacer(modifier = Modifier.width(8.dp))
                         if (isSimulating) {
-                            Text("Lokasi: ${vehicleLocation.latitude}, ${vehicleLocation.longitude}")
-                            Text("Kecepatan: $vehicleSpeed km/h")
-                            Text("Mesin: ${if (engineStatus) "On" else "Off"}")
-                            Text("Pintu: ${if (doorStatus) "Terbuka" else "Tertutup"}")
+                            Text("Location: ${vehicleLocation.latitude}, ${vehicleLocation.longitude}")
+                            Text("Speed: $vehicleSpeed km/h")
+                            Text("Engine: ${if (engineStatus) "On" else "Off"}")
+                            Text("Door: ${if (doorStatus) "Open" else "Close"}")
                             Button(onClick = { vehicleViewModel.toggleSimulation() }) {
                                 Text("Stop Simulation")
                             }
                         } else {
-                            Text("Simulasi belum dimulai.")
+                            Text("Simulation not started yet.")
                             Button(onClick = { vehicleViewModel.toggleSimulation() }) {
                                 Text("Start Simulation")
                             }
